@@ -24,10 +24,14 @@ import java.util.List;
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
-public class LastAccessLoadBalancer implements LoadBalancer {
-
+public class WeightLoadBalancer implements LoadBalancer {
 	@Override
 	public InstanceRecord selectOne(List<InstanceRecord> instances) {
 		return null;
+	}
+
+	@Override
+	public String name() {
+		return "WeightLoadBalancer";
 	}
 }

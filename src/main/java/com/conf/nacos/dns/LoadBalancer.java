@@ -25,6 +25,17 @@ import java.util.List;
  */
 public interface LoadBalancer {
 
+	/**
+	 *
+	 * @param instances
+	 * @return
+	 */
 	InstanceRecord selectOne(final List<InstanceRecord> instances);
+
+	/**
+	 *
+	 * @return
+	 */
+	String name();
 
 }

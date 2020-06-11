@@ -22,21 +22,23 @@ import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alibaba.nacos.api.naming.utils.NamingUtils;
+import com.alibaba.nacos.common.utils.ExceptionUtil;
 import com.alibaba.nacos.common.utils.MapUtils;
 import com.conf.nacos.dns.constants.Constants;
-import com.conf.nacos.dns.loadbalancer.LastAccessLoadBalancer;
 import com.conf.nacos.dns.loadbalancer.RandomLoadBalancer;
-import com.conf.nacos.dns.loadbalancer.RoundRobinLoadBalancer;
 import com.conf.nacos.dns.pojo.InstanceRecord;
-import org.jctools.maps.NonBlockingHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.ServiceLoader;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
@@ -47,10 +49,14 @@ public class NacosDnsCore {
 
 	private static final Logger logger = LoggerFactory.getLogger(NacosDnsCore.class);
 
-	private static final Map<String, List<InstanceRecord>> serviceMap = new NonBlockingHashMap<>(
+	private static final Map<String, List<InstanceRecord>> serviceMap = new ConcurrentHashMap<>(
 			32);
 
-	private static final LoadBalancer[] balancers = new LoadBalancer[3];
+	private static final LoadBalancer DEFAULT_LOAD_BALANCER = new RandomLoadBalancer();
+
+	private static String LOAD_BALANCER_NAME = Constants.RANDOM_LOAD_BALANCER;
+
+	private static final Map<String, LoadBalancer> balancers = new HashMap<>();
 
 	private static NamingService nacosClient;
 
@@ -71,18 +77,17 @@ public class NacosDnsCore {
 	}
 
 	private void initLoadBalancer() {
-		balancers[0] = new RoundRobinLoadBalancer();
-		balancers[1] = new LastAccessLoadBalancer();
-		balancers[2] = new RandomLoadBalancer();
+		ServiceLoader<LoadBalancer> loader = ServiceLoader.load(LoadBalancer.class);
+		loader.forEach(loadBalancer -> balancers.put(loadBalancer.name(), loadBalancer));
 	}
 
 
-	public InstanceRecord selectOne(final String domain) {
+	public Optional<InstanceRecord> selectOne(final String domain) {
 		List<InstanceRecord> list = findAllInstanceByServiceName(domain);
 		if (list.isEmpty()) {
-			return null;
+			return Optional.empty();
 		}
-		return balancers[2].selectOne(list);
+		return Optional.of(balancers.getOrDefault(LOAD_BALANCER_NAME, DEFAULT_LOAD_BALANCER).selectOne(list));
 	}
 
 	private List<InstanceRecord> findAllInstanceByServiceName(final String serviceName) {
@@ -98,16 +103,15 @@ public class NacosDnsCore {
 				String domain = serviceName.substring(0, serviceName.length() - 1).replace("\\@\\@", "@@");
 				final String _serviceName = NamingUtils.getServiceName(domain);
 				final String _groupName = NamingUtils.getGroupName(domain);
+				logger.debug("domain info : {}, serviceName : {}, groupName : {}", domain, _serviceName, _groupName);
 				List<Instance> instances = nacosClient.getAllInstances(_serviceName, _groupName);
-				System.out.println(instances);
 				registerInstanceChangeObserver(serviceName);
 				return parseToInstanceRecord(instances);
 			}
 			catch (Throwable ex) {
 				logger.error(
 						"An error occurred querying the service instance remotely : {}",
-						ex);
-				ex.printStackTrace();
+						ExceptionUtil.getStackTrace(ex));
 				return Collections.emptyList();
 			}
 		});

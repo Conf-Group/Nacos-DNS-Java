@@ -36,6 +36,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -44,7 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
-public class DnsServer extends Thread {
+public class DnsServer {
 
 	private static final ThreadLocal<ByteBuffer> THREAD_LOCAL = ThreadLocal.withInitial(() -> ByteBuffer.allocate(1024));
 
@@ -69,7 +70,11 @@ public class DnsServer extends Thread {
 				}
 			});
 
-	public DnsServer() throws NacosDnsException {
+	public static DnsServer create() throws NacosDnsException {
+		return new DnsServer();
+	}
+
+	private DnsServer() throws NacosDnsException {
 		try {
 			init();
 			nacosDnsCore = new NacosDnsCore();
@@ -87,7 +92,6 @@ public class DnsServer extends Thread {
 				serverChannel.socket().bind(new InetSocketAddress("127.0.0.1", 53));
 				serverChannel.configureBlocking(false);
 				serverChannel.register(selector, SelectionKey.OP_READ);
-				System.out.println("finished dns-server open");
 			} catch (Throwable ex) {
 				throw new NacosDnsException(Code.CREATE_DNS_SERVER_FAILED, ex);
 			}
@@ -95,13 +99,9 @@ public class DnsServer extends Thread {
 		});
 	}
 
-	@Override
-	public void run() {
-		LOGGER.info("DNS-Server starting");
-		System.out.println("DNS-Server starting");
-
+	public void start() {
+		LOGGER.info("dns-server starting");
 		final ByteBuffer buffer = ByteBuffer.allocate(1024);
-
 		for ( ; ; ) {
 			try {
 				selector.select();
@@ -112,14 +112,7 @@ public class DnsServer extends Thread {
 						buffer.flip();
 						byte[] requestData = new byte[buffer.limit()];
 						buffer.get(requestData, 0, requestData.length);
-						executor.execute(() -> {
-							try {
-								handler(requestData, client);
-							} finally {
-								ByteBuffer byteBuffer = THREAD_LOCAL.get();
-								byteBuffer.clear();
-							}
-						});
+						executor.execute(() -> handler(requestData, client));
 					}
 				}
 			} catch (Throwable ex) {
@@ -129,8 +122,9 @@ public class DnsServer extends Thread {
 	}
 
 	private void handler(final byte[] data, final SocketAddress client) {
+		final ByteBuffer buffer = THREAD_LOCAL.get();
+		buffer.clear();
 		try {
-			final ByteBuffer buffer = THREAD_LOCAL.get();
 			final Message message = new Message(data);
 			final Record question = message.getQuestion();
 			final String domain = question.getName().toString();
@@ -142,14 +136,17 @@ public class DnsServer extends Thread {
 			serverChannel.send(buffer, client);
 		} catch (Throwable ex) {
 			LOGGER.error("response to client has error : {}", ExceptionUtil.getStackTrace(ex));
+		} finally {
+			THREAD_LOCAL.set(buffer);
 		}
 	}
 
 	private static Record createRecordByQuery(final Record request, final String domain) {
-		InstanceRecord record = nacosDnsCore.selectOne(domain);
-		if (record == null) {
+		Optional<InstanceRecord> optional = nacosDnsCore.selectOne(domain);
+		if (!optional.isPresent()) {
 			return NULLRecord.newRecord(request.getName(), request.getType(), request.getDClass());
 		}
+		InstanceRecord record = optional.get();
 		InetSocketAddress address = new InetSocketAddress(record.getIp(), record.getPort());
 		return new ARecord(request.getName(), request.getDClass(), request.getTTL(), address.getAddress());
 	}

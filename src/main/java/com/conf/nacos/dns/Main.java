@@ -16,18 +16,19 @@
  */
 package com.conf.nacos.dns;
 
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class Main {
 
-	public static void main(String[] args) throws Exception {
-		DnsServer server = new DnsServer();
+	public static void main(String[] args) {
+		resourceInit();
+		DnsServer server = DnsServer.create();
 		server.start();
-		CountDownLatch latch = new CountDownLatch(1);
-		latch.await();
+	}
+
+	private static void resourceInit() {
 	}
 
 }

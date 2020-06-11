@@ -31,4 +31,9 @@ public class RoundRobinLoadBalancer implements LoadBalancer {
 		return null;
 	}
 
+	@Override
+	public String name() {
+		return "RoundRobinLoadBalancer";
+	}
+
 }

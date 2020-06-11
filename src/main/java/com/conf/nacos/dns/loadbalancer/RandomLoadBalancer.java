@@ -34,4 +34,9 @@ public class RandomLoadBalancer implements LoadBalancer {
 		int index = random.nextInt(size);
 		return instances.get(index);
 	}
+
+	@Override
+	public String name() {
+		return "RandomLoadBalancer";
+	}
 }
