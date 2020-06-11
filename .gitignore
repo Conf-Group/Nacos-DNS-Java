@@ -1,0 +1,12 @@
+# Except this file !.gitignore
+.classpath
+.project
+.settings
+out
+build
+.gradle
+.idea
+.vscode
+.DS_Store
+.factorypath
+*.iml
