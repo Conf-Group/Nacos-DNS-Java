@@ -19,16 +19,34 @@ package com.conf.nacos.dns.loadbalancer;
 import com.conf.nacos.dns.LoadBalancer;
 import com.conf.nacos.dns.pojo.InstanceRecord;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class RoundRobinLoadBalancer implements LoadBalancer {
-
+	
+	AtomicInteger index = new AtomicInteger(0);
+	
+	private volatile List<InstanceRecord> instances = new ArrayList<>(100);
+	
 	@Override
-	public InstanceRecord selectOne(List<InstanceRecord> instances) {
-		return null;
+	public void recordChange(List<InstanceRecord> recordList) {
+		List<InstanceRecord> old = instances;
+		instances = recordList;
+		old.clear();
+	}
+	
+	@Override
+	public InstanceRecord selectOne() {
+		List<InstanceRecord> copy = instances;
+		int currentIndex = index.getAndIncrement();
+		if (index.get() == copy.size() - 1) {
+			index.lazySet(0);
+		}
+		return copy.get(currentIndex);
 	}
 
 	@Override

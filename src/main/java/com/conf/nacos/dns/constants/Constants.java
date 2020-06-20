@@ -22,6 +22,10 @@ import com.alibaba.nacos.api.PropertyKeyConst;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public final class Constants {
+	
+	public static final String DEFAULT_GROUP = com.alibaba.nacos.api.common.Constants.DEFAULT_GROUP;
+	
+	public static final String CONFIG_FILE_NAME = "nacos-dns.yaml";
 
 	public static final String PREFIX = "nacos.dns.";
 

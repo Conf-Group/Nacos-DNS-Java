@@ -1,0 +1,8 @@
+loadBalancer: RandomLoadBalancer
+
+resolver:
+  serviceGroupMatch:
+    ^nacos\t\w+\w+: liaochuntao
+
+nacosConfig:
+  serverAddr: 127.0.0.1:8847,127.0.0.1:8848,127.0.0.1:8849

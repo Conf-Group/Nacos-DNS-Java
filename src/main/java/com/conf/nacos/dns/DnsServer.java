@@ -16,10 +16,13 @@
  */
 package com.conf.nacos.dns;
 
+import com.alibaba.nacos.common.executor.ExecutorFactory;
+import com.alibaba.nacos.common.executor.NameThreadFactory;
 import com.alibaba.nacos.common.utils.ExceptionUtil;
 import com.conf.nacos.dns.constants.Code;
 import com.conf.nacos.dns.exception.NacosDnsException;
 import com.conf.nacos.dns.pojo.InstanceRecord;
+import com.conf.nacos.dns.pojo.NacosDnsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.ARecord;
@@ -38,9 +41,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
@@ -56,28 +56,20 @@ public class DnsServer {
 	private static DatagramChannel serverChannel;
 	private static Selector selector = null;
 
-	private static final Executor executor = Executors.newFixedThreadPool(
-			Runtime.getRuntime().availableProcessors(), new ThreadFactory() {
+	private static final Executor executor = ExecutorFactory.newFixExecutorService(
+			DnsServer.class.getCanonicalName(),
+			Runtime.getRuntime().availableProcessors(),
+			new NameThreadFactory("com.conf.nacos.dns.worker")
+	);
 
-				AtomicInteger workerId = new AtomicInteger();
-
-				@Override
-				public Thread newThread(Runnable r) {
-					final Thread t = new Thread(r);
-					t.setName("com.conf.nacos.dns.worker-" + workerId.getAndIncrement());
-					t.setDaemon(true);
-					return t;
-				}
-			});
-
-	public static DnsServer create() throws NacosDnsException {
-		return new DnsServer();
+	public static DnsServer create(NacosDnsConfig config) throws NacosDnsException {
+		return new DnsServer(config);
 	}
 
-	private DnsServer() throws NacosDnsException {
+	private DnsServer(NacosDnsConfig config) throws NacosDnsException {
 		try {
 			init();
-			nacosDnsCore = new NacosDnsCore();
+			nacosDnsCore = new NacosDnsCore(config);
 		} catch (Throwable ex) {
 			throw new NacosDnsException(Code.CREATE_DNS_SERVER_FAILED, ex);
 		}

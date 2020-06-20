@@ -14,42 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.conf.nacos.dns.loadbalancer;
 
-import com.conf.nacos.dns.LoadBalancer;
-import com.conf.nacos.dns.pojo.InstanceRecord;
+package com.conf.nacos.dns.pojo;
 
-import java.util.List;
-import java.util.PriorityQueue;
-
+import java.util.HashMap;
+import java.util.Map;
 
 /**
+ * In which group does the service of the query fall.
+ *
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
-public class WeightLoadBalancer implements LoadBalancer {
-	
-	private volatile PriorityQueue<InstanceRecord> records = new PriorityQueue<>(
-			(o1, o2) -> (int) (o2.getWeight() - o1.getWeight()));
-	
-	@Override
-	public void recordChange(List<InstanceRecord> recordList) {
-		PriorityQueue<InstanceRecord> old = records;
-		
-		PriorityQueue<InstanceRecord> copy = new PriorityQueue<>(
-				(o1, o2) -> (int) (o2.getWeight() - o1.getWeight()));
-		copy.addAll(recordList);
-		
-		records = copy;
-		old.clear();
-	}
-	
-	@Override
-	public InstanceRecord selectOne() {
-		return records.peek();
-	}
-
-	@Override
-	public String name() {
-		return "WeightLoadBalancer";
-	}
+public class NamingResolverConfig {
+    
+    private Map<String, String> serviceGroupMatch = new HashMap<>();
+    
+    public Map<String, String> getServiceGroupMatch() {
+        return serviceGroupMatch;
+    }
+    
+    public void setServiceGroupMatch(Map<String, String> serviceGroupMatch) {
+        this.serviceGroupMatch = serviceGroupMatch;
+    }
 }

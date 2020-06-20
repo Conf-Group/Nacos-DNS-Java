@@ -24,13 +24,19 @@ import java.util.List;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public interface LoadBalancer {
+	
+	/**
+	 *
+	 *
+	 * @param recordList
+	 */
+	void recordChange(final List<InstanceRecord> recordList);
 
 	/**
 	 *
-	 * @param instances
 	 * @return
 	 */
-	InstanceRecord selectOne(final List<InstanceRecord> instances);
+	InstanceRecord selectOne();
 
 	/**
 	 *

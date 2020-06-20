@@ -14,42 +14,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.conf.nacos.dns.loadbalancer;
 
-import com.conf.nacos.dns.LoadBalancer;
-import com.conf.nacos.dns.pojo.InstanceRecord;
-
-import java.util.List;
-import java.util.PriorityQueue;
-
+package com.conf.nacos.dns.pojo;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
-public class WeightLoadBalancer implements LoadBalancer {
-	
-	private volatile PriorityQueue<InstanceRecord> records = new PriorityQueue<>(
-			(o1, o2) -> (int) (o2.getWeight() - o1.getWeight()));
-	
-	@Override
-	public void recordChange(List<InstanceRecord> recordList) {
-		PriorityQueue<InstanceRecord> old = records;
-		
-		PriorityQueue<InstanceRecord> copy = new PriorityQueue<>(
-				(o1, o2) -> (int) (o2.getWeight() - o1.getWeight()));
-		copy.addAll(recordList);
-		
-		records = copy;
-		old.clear();
-	}
-	
-	@Override
-	public InstanceRecord selectOne() {
-		return records.peek();
-	}
-
-	@Override
-	public String name() {
-		return "WeightLoadBalancer";
-	}
+public class NacosDnsConfig {
+    
+    private String loadBalancer;
+    
+    private NamingResolverConfig resolver;
+    
+    private NacosClientConfig nacosConfig;
+    
+    public String getLoadBalancer() {
+        return loadBalancer;
+    }
+    
+    public void setLoadBalancer(String loadBalancer) {
+        this.loadBalancer = loadBalancer;
+    }
+    
+    public NamingResolverConfig getResolver() {
+        return resolver;
+    }
+    
+    public void setResolver(NamingResolverConfig resolver) {
+        this.resolver = resolver;
+    }
+    
+    public NacosClientConfig getNacosConfig() {
+        return nacosConfig;
+    }
+    
+    public void setNacosConfig(NacosClientConfig nacosConfig) {
+        this.nacosConfig = nacosConfig;
+    }
 }
