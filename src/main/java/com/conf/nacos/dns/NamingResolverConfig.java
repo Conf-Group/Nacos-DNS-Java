@@ -15,21 +15,25 @@
  * limitations under the License.
  */
 
-package com.conf.nacos.dns.exception;
+package com.conf.nacos.dns;
 
-import com.conf.nacos.dns.constants.Code;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
+ * In which group does the service of the query fall.
+ *
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
-public class BaseException extends RuntimeException {
+public class NamingResolverConfig {
     
-    public BaseException(Code code) {
-        super(code.toString());
+    private Map<String, String> serviceGroupMatch = new HashMap<>();
+    
+    public Map<String, String> getServiceGroupMatch() {
+        return serviceGroupMatch;
     }
     
-    public BaseException(Code code, Throwable ex) {
-        super(code.toString(), ex);
+    public void setServiceGroupMatch(Map<String, String> serviceGroupMatch) {
+        this.serviceGroupMatch = serviceGroupMatch;
     }
-    
 }

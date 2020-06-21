@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.conf.nacos.dns;
 
 import com.conf.nacos.dns.pojo.InstanceRecord;
@@ -21,27 +22,31 @@ import com.conf.nacos.dns.pojo.InstanceRecord;
 import java.util.List;
 
 /**
+ * Load balancing.
+ *
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public interface LoadBalancer {
-	
-	/**
-	 *
-	 *
-	 * @param recordList
-	 */
-	void recordChange(final List<InstanceRecord> recordList);
-
-	/**
-	 *
-	 * @return
-	 */
-	InstanceRecord selectOne();
-
-	/**
-	 *
-	 * @return
-	 */
-	String name();
-
+    
+    /**
+     * Node information change.
+     *
+     * @param recordList {@link List<InstanceRecord>}
+     */
+    void recordChange(final List<InstanceRecord> recordList);
+    
+    /**
+     * Returns an instance of a service.
+     *
+     * @return {@link InstanceRecord}
+     */
+    InstanceRecord selectOne();
+    
+    /**
+     * loadbalancer name
+     *
+     * @return this loadbalancer name
+     */
+    String name();
+    
 }

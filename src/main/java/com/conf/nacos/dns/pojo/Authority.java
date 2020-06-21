@@ -15,21 +15,11 @@
  * limitations under the License.
  */
 
-package com.conf.nacos.dns.exception;
-
-import com.conf.nacos.dns.constants.Code;
+package com.conf.nacos.dns.pojo;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
-public class BaseException extends RuntimeException {
-    
-    public BaseException(Code code) {
-        super(code.toString());
-    }
-    
-    public BaseException(Code code, Throwable ex) {
-        super(code.toString(), ex);
-    }
+public class Authority extends Resource {
     
 }

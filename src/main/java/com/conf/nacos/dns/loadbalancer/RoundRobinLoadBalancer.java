@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.conf.nacos.dns.loadbalancer;
 
 import com.conf.nacos.dns.LoadBalancer;
@@ -27,31 +28,31 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class RoundRobinLoadBalancer implements LoadBalancer {
-	
-	AtomicInteger index = new AtomicInteger(0);
-	
-	private volatile List<InstanceRecord> instances = new ArrayList<>(100);
-	
-	@Override
-	public void recordChange(List<InstanceRecord> recordList) {
-		List<InstanceRecord> old = instances;
-		instances = recordList;
-		old.clear();
-	}
-	
-	@Override
-	public InstanceRecord selectOne() {
-		List<InstanceRecord> copy = instances;
-		int currentIndex = index.getAndIncrement();
-		if (index.get() == copy.size() - 1) {
-			index.lazySet(0);
-		}
-		return copy.get(currentIndex);
-	}
-
-	@Override
-	public String name() {
-		return "RoundRobinLoadBalancer";
-	}
-
+    
+    AtomicInteger index = new AtomicInteger(0);
+    
+    private volatile List<InstanceRecord> instances = new ArrayList<>(100);
+    
+    @Override
+    public void recordChange(List<InstanceRecord> recordList) {
+        List<InstanceRecord> old = instances;
+        instances = recordList;
+        old.clear();
+    }
+    
+    @Override
+    public InstanceRecord selectOne() {
+        List<InstanceRecord> copy = instances;
+        int currentIndex = index.getAndIncrement();
+        if (index.get() == copy.size() - 1) {
+            index.lazySet(0);
+        }
+        return copy.get(currentIndex);
+    }
+    
+    @Override
+    public String name() {
+        return "RoundRobinLoadBalancer";
+    }
+    
 }

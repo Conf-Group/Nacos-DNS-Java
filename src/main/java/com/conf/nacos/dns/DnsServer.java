@@ -14,15 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.conf.nacos.dns;
 
 import com.alibaba.nacos.common.executor.ExecutorFactory;
 import com.alibaba.nacos.common.executor.NameThreadFactory;
 import com.alibaba.nacos.common.utils.ExceptionUtil;
 import com.conf.nacos.dns.constants.Code;
+import com.conf.nacos.dns.constants.Constants;
 import com.conf.nacos.dns.exception.NacosDnsException;
 import com.conf.nacos.dns.pojo.InstanceRecord;
-import com.conf.nacos.dns.pojo.NacosDnsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.ARecord;
@@ -43,103 +44,153 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
+ * DNS server
+ *
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class DnsServer {
-
-	private static final ThreadLocal<ByteBuffer> THREAD_LOCAL = ThreadLocal.withInitial(() -> ByteBuffer.allocate(1024));
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(DnsServer.class);
-
-	private static NacosDnsCore nacosDnsCore;
-
-	private static DatagramChannel serverChannel;
-	private static Selector selector = null;
-
-	private static final Executor executor = ExecutorFactory.newFixExecutorService(
-			DnsServer.class.getCanonicalName(),
-			Runtime.getRuntime().availableProcessors(),
-			new NameThreadFactory("com.conf.nacos.dns.worker")
-	);
-
-	public static DnsServer create(NacosDnsConfig config) throws NacosDnsException {
-		return new DnsServer(config);
-	}
-
-	private DnsServer(NacosDnsConfig config) throws NacosDnsException {
-		try {
-			init();
-			nacosDnsCore = new NacosDnsCore(config);
-		} catch (Throwable ex) {
-			throw new NacosDnsException(Code.CREATE_DNS_SERVER_FAILED, ex);
-		}
-	}
-
-	private void init() throws Exception {
-		AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-			try {
-				// 192.168.31.1
-				selector = Selector.open();
-				serverChannel = DatagramChannel.open();
-				serverChannel.socket().bind(new InetSocketAddress("127.0.0.1", 53));
-				serverChannel.configureBlocking(false);
-				serverChannel.register(selector, SelectionKey.OP_READ);
-			} catch (Throwable ex) {
-				throw new NacosDnsException(Code.CREATE_DNS_SERVER_FAILED, ex);
-			}
-			return null;
-		});
-	}
-
-	public void start() {
-		LOGGER.info("dns-server starting");
-		final ByteBuffer buffer = ByteBuffer.allocate(1024);
-		for ( ; ; ) {
-			try {
-				selector.select();
-				for (SelectionKey key : selector.selectedKeys()) {
-					if (key.isReadable()) {
-						buffer.clear();
-						SocketAddress client = serverChannel.receive(buffer);
-						buffer.flip();
-						byte[] requestData = new byte[buffer.limit()];
-						buffer.get(requestData, 0, requestData.length);
-						executor.execute(() -> handler(requestData, client));
-					}
-				}
-			} catch (Throwable ex) {
-				LOGGER.error("handler client request has error : {}", ExceptionUtil.getStackTrace(ex));
-			}
-		}
-	}
-
-	private void handler(final byte[] data, final SocketAddress client) {
-		final ByteBuffer buffer = THREAD_LOCAL.get();
-		buffer.clear();
-		try {
-			final Message message = new Message(data);
-			final Record question = message.getQuestion();
-			final String domain = question.getName().toString();
-			final Record response = createRecordByQuery(question, domain);
-			final Message out = message.clone();
-			out.addRecord(response, Section.ANSWER);
-			buffer.put(out.toWire());
-			buffer.flip();
-			serverChannel.send(buffer, client);
-		} catch (Throwable ex) {
-			LOGGER.error("response to client has error : {}", ExceptionUtil.getStackTrace(ex));
-		} finally {
-			THREAD_LOCAL.set(buffer);
-		}
-	}
-
-	private static Record createRecordByQuery(final Record request, final String domain) {
-		Optional<InstanceRecord> optional = nacosDnsCore.selectOne(domain);
-		if (!optional.isPresent()) {
-			return NULLRecord.newRecord(request.getName(), request.getType(), request.getDClass());
-		}
-		InstanceRecord record = optional.get();
-		InetSocketAddress address = new InetSocketAddress(record.getIp(), record.getPort());
-		return new ARecord(request.getName(), request.getDClass(), request.getTTL(), address.getAddress());
-	}
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(DnsServer.class);
+    
+    private final NacosDnsCore nacosDnsCore;
+    
+    private final String backendDnsServer;
+    
+    private final Executor executor = ExecutorFactory
+            .newFixExecutorService(DnsServer.class.getCanonicalName(), Runtime.getRuntime().availableProcessors(),
+                    new NameThreadFactory("com.conf.nacos.dns.worker"));
+    
+    private final int bufferSize;
+    
+    private final ThreadLocal<ByteBuffer> bufferPool;
+    
+    private DatagramChannel serverChannel;
+    
+    private Selector selector = null;
+    
+    private volatile boolean shutdown = false;
+    
+    private DnsServer(NacosDnsConfig config) throws NacosDnsException {
+        try {
+            long startTime = System.currentTimeMillis();
+            bufferSize = config.getBufferSize();
+            bufferPool = ThreadLocal.withInitial(() -> ByteBuffer.allocate(bufferSize));
+            backendDnsServer = config.getBackendDns();
+            init();
+            nacosDnsCore = new NacosDnsCore(config);
+            LOGGER.info("dns-server already initialized, spend {} ms", (System.currentTimeMillis() - startTime));
+        } catch (Throwable ex) {
+            throw new NacosDnsException(Code.CREATE_DNS_SERVER_FAILED, ex);
+        }
+    }
+    
+    public static DnsServer create(NacosDnsConfig config) throws NacosDnsException {
+        return new DnsServer(config);
+    }
+    
+    private void init() {
+        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            try {
+                // 192.168.31.1
+                selector = Selector.open();
+                serverChannel = DatagramChannel.open();
+                serverChannel.socket().bind(new InetSocketAddress("127.0.0.1", Constants.DNS_PORT));
+                serverChannel.configureBlocking(false);
+                serverChannel.register(selector, SelectionKey.OP_READ);
+            } catch (Throwable ex) {
+                throw new NacosDnsException(Code.CREATE_DNS_SERVER_FAILED, ex);
+            }
+            return null;
+        });
+    }
+    
+    public void start() {
+        final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+        for (; ; ) {
+            
+            if (shutdown) {
+                return;
+            }
+            
+            try {
+                selector.select();
+                for (SelectionKey key : selector.selectedKeys()) {
+                    if (key.isReadable()) {
+                        buffer.clear();
+                        SocketAddress client = serverChannel.receive(buffer);
+                        buffer.flip();
+                        byte[] requestData = new byte[buffer.limit()];
+                        buffer.get(requestData, 0, requestData.length);
+                        executor.execute(() -> handler(requestData, client));
+                    }
+                }
+            } catch (Throwable ex) {
+                LOGGER.error("handler client request has error : {}", ExceptionUtil.getStackTrace(ex));
+            }
+        }
+    }
+    
+    private void handler(final byte[] data, final SocketAddress client) {
+        final ByteBuffer buffer = bufferPool.get();
+        buffer.clear();
+        try {
+            final Message message = new Message(data);
+            final Record question = message.getQuestion();
+            final String domain = question.getName().toString();
+            final Optional<Message> result = findFromNacos(message.clone(), question, domain);
+            Message resp = result.orElseGet(() -> findRecordFromBackend(data, message.clone(), question));
+            buffer.put(resp.toWire());
+            buffer.flip();
+            serverChannel.send(buffer, client);
+        } catch (Throwable ex) {
+            LOGGER.error("response to client has error : {}", ExceptionUtil.getStackTrace(ex));
+        } finally {
+            bufferPool.set(buffer);
+        }
+    }
+    
+    private Optional<Message> findFromNacos(final Message message, final Record request, final String domain) {
+        Optional<InstanceRecord> optional = nacosDnsCore.selectOne(domain);
+        if (!optional.isPresent()) {
+            return Optional.empty();
+        }
+        InstanceRecord record = optional.get();
+        InetSocketAddress address = new InetSocketAddress(record.getIp(), record.getPort());
+        Record r = new ARecord(request.getName(), request.getDClass(), request.getTTL(), address.getAddress());
+        message.addRecord(r, Section.ANSWER);
+        return Optional.of(message);
+    }
+    
+    private Message findRecordFromBackend(final byte[] data, final Message message, final Record request) {
+        try {
+            DatagramChannel channel = DatagramChannel.open();
+            channel.configureBlocking(true);
+            channel.connect(new InetSocketAddress(backendDnsServer, Constants.DNS_PORT));
+            
+            ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+            buffer.put(data);
+            buffer.flip();
+            channel.write(buffer);
+            buffer.clear();
+            
+            channel.receive(buffer);
+            buffer.flip();
+            byte[] receive = new byte[buffer.limit()];
+            buffer.get(receive, 0, receive.length);
+            return new Message(receive);
+        } catch (Throwable ex) {
+            LOGGER.warn("Domain name resolution failed through upper DNS Server : {}", ExceptionUtil.getStackTrace(ex));
+            message.addRecord(NULLRecord.newRecord(request.getName(), request.getType(), request.getDClass()),
+                    Section.ANSWER);
+            return message;
+        }
+        
+    }
+    
+    public void shutdown() throws Exception {
+        shutdown = true;
+        nacosDnsCore.shutdown();
+        selector.close();
+        serverChannel.close();
+    }
 }

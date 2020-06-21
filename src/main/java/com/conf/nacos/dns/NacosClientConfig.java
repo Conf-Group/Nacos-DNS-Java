@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.conf.nacos.dns.pojo;
+package com.conf.nacos.dns;
 
 import java.util.Properties;
 
@@ -25,10 +25,15 @@ import java.util.Properties;
 public class NacosClientConfig {
     
     private String namespace;
+    
     private String serverAddr;
+    
     private String endpoint;
+    
     private String contextPath;
+    
     private String username;
+    
     private String password;
     
     public String getNamespace() {

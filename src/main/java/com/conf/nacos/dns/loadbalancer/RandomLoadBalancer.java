@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.conf.nacos.dns.loadbalancer;
 
 import com.conf.nacos.dns.LoadBalancer;
@@ -27,26 +28,26 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class RandomLoadBalancer implements LoadBalancer {
-	
-	private volatile List<InstanceRecord> instances = new ArrayList<>(100);
-	
-	@Override
-	public void recordChange(List<InstanceRecord> recordList) {
-		List<InstanceRecord> old = instances;
-		instances = recordList;
-		old.clear();
-	}
-	
-	@Override
-	public InstanceRecord selectOne() {
-		int size = instances.size();
-		ThreadLocalRandom random = ThreadLocalRandom.current();
-		int index = random.nextInt(size);
-		return instances.get(index);
-	}
-
-	@Override
-	public String name() {
-		return "RandomLoadBalancer";
-	}
+    
+    private volatile List<InstanceRecord> instances = new ArrayList<>(100);
+    
+    @Override
+    public void recordChange(List<InstanceRecord> recordList) {
+        List<InstanceRecord> old = instances;
+        instances = recordList;
+        old.clear();
+    }
+    
+    @Override
+    public InstanceRecord selectOne() {
+        int size = instances.size();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        int index = random.nextInt(size);
+        return instances.get(index);
+    }
+    
+    @Override
+    public String name() {
+        return "RandomLoadBalancer";
+    }
 }

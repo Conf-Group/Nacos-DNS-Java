@@ -20,35 +20,6 @@ package com.conf.nacos.dns.pojo;
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
-public class NacosDnsConfig {
+public class Additional extends Resource {
     
-    private String loadBalancer;
-    
-    private NamingResolverConfig resolver;
-    
-    private NacosClientConfig nacosConfig;
-    
-    public String getLoadBalancer() {
-        return loadBalancer;
-    }
-    
-    public void setLoadBalancer(String loadBalancer) {
-        this.loadBalancer = loadBalancer;
-    }
-    
-    public NamingResolverConfig getResolver() {
-        return resolver;
-    }
-    
-    public void setResolver(NamingResolverConfig resolver) {
-        this.resolver = resolver;
-    }
-    
-    public NacosClientConfig getNacosConfig() {
-        return nacosConfig;
-    }
-    
-    public void setNacosConfig(NacosClientConfig nacosConfig) {
-        this.nacosConfig = nacosConfig;
-    }
 }

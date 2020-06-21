@@ -17,23 +17,9 @@
 
 package com.conf.nacos.dns.pojo;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * In which group does the service of the query fall.
- *
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
-public class NamingResolverConfig {
+public class Answer extends Resource {
     
-    private Map<String, String> serviceGroupMatch = new HashMap<>();
-    
-    public Map<String, String> getServiceGroupMatch() {
-        return serviceGroupMatch;
-    }
-    
-    public void setServiceGroupMatch(Map<String, String> serviceGroupMatch) {
-        this.serviceGroupMatch = serviceGroupMatch;
-    }
 }

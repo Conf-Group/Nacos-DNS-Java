@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.conf.nacos.dns.exception;
 
 import com.conf.nacos.dns.constants.Code;
@@ -22,12 +23,12 @@ import com.conf.nacos.dns.constants.Code;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class NacosDnsException extends BaseException {
-
-	public NacosDnsException(Code code) {
-		super(code);
-	}
-
-	public NacosDnsException(Code code, Throwable ex) {
-		super(code, ex);
-	}
+    
+    public NacosDnsException(Code code) {
+        super(code);
+    }
+    
+    public NacosDnsException(Code code, Throwable ex) {
+        super(code, ex);
+    }
 }

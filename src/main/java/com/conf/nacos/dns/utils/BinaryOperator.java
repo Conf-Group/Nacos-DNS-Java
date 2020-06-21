@@ -15,21 +15,31 @@
  * limitations under the License.
  */
 
-package com.conf.nacos.dns.exception;
-
-import com.conf.nacos.dns.constants.Code;
+package com.conf.nacos.dns.utils;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
-public class BaseException extends RuntimeException {
+public class BinaryOperator {
     
-    public BaseException(Code code) {
-        super(code.toString());
+    public static int extractTargetValue(byte b, int offset, int length) {
+        return (b >>> (7 - offset + length - 1)) & ~(0xff << length);
     }
     
-    public BaseException(Code code, Throwable ex) {
-        super(code.toString(), ex);
+    public static int byteArrayToInt(byte[] bytes) {
+        return ((bytes[0] & 0xff) << 8)
+                | (bytes[1] & 0xff);
+    }
+    
+    public static long byteArrayToLong(byte[] bytes) {
+        return ((bytes[0] & 0xffff) << 24)
+                | ((bytes[1] & 0xffff) << 16)
+                | ((bytes[2] & 0xffff) << 8)
+                | (bytes[3] & 0xffff);
+    }
+    
+    public static String byteArrayToString(byte[] bytes) {
+        return new String(bytes);
     }
     
 }

@@ -26,7 +26,6 @@ import com.alibaba.nacos.common.utils.ExceptionUtil;
 import com.conf.nacos.dns.constants.Constants;
 import com.conf.nacos.dns.loadbalancer.RandomLoadBalancer;
 import com.conf.nacos.dns.pojo.InstanceRecord;
-import com.conf.nacos.dns.pojo.NacosDnsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,34 +55,49 @@ public class NacosDnsCore {
     
     private final LoadBalancer defaultLoadBalancer = new RandomLoadBalancer();
     
-    private final Map<String, LoadBalancer> balancers = new HashMap<>();
-    
-	private Supplier<LoadBalancer> supplier;
+    private final Map<String, LoadBalancer> balancers = new HashMap<>(4);
     
     private final NamingService nacosClient;
-
+    
+    private Supplier<LoadBalancer> supplier;
+    
     // It can change dynamically
     
-	private volatile String balancerName = Constants.RANDOM_LOAD_BALANCER;
-	
-	private volatile Map<String, Pattern> patternMap = new HashMap<>();
-	
-	private volatile Map<String, String> serviceToGroup;
-	
-	public NacosDnsCore(NacosDnsConfig config) throws Throwable {
+    private volatile String balancerName = Constants.RANDOM_LOAD_BALANCER;
+    
+    private volatile Map<String, Pattern> patternMap = new HashMap<>();
+    
+    private volatile Map<String, String> serviceToGroup;
+    
+    public NacosDnsCore(NacosDnsConfig config) throws Throwable {
         nacosClient = NacosFactory.createNamingService(config.getNacosConfig().toNacosClientProperties());
         serviceToGroup = Collections.unmodifiableMap(config.getResolver().getServiceGroupMatch());
-		serviceToGroup.forEach((serviceRegx, group) -> {
-			patternMap.put(serviceRegx, Pattern.compile(serviceRegx));
-		});
-		
-		balancerName = config.getLoadBalancer();
-	
-	    supplier = () -> {
+        serviceToGroup.forEach((serviceRegx, group) -> {
+            patternMap.put(serviceRegx, Pattern.compile(serviceRegx));
+        });
+        
+        balancerName = config.getLoadBalancer();
+        
+        supplier = () -> {
             ServiceLoader<LoadBalancer> loader = ServiceLoader.load(LoadBalancer.class);
             loader.forEach(loadBalancer -> balancers.put(loadBalancer.name(), loadBalancer));
             return balancers.getOrDefault(balancerName, defaultLoadBalancer);
         };
+    }
+    
+    private static List<InstanceRecord> parseToInstanceRecord(List<Instance> instances) {
+        int maxSize = 10_000;
+        Stream<Instance> stream;
+        if (instances.size() < maxSize) {
+            stream = instances.stream();
+        } else {
+            stream = instances.parallelStream();
+        }
+        
+        return stream.map(instance -> InstanceRecord.builder().ip(instance.getIp()).port(instance.getPort())
+                .healthy(instance.isHealthy()).enabled(instance.isEnabled()).weight(instance.getWeight())
+                .metadata(instance.getMetadata()).build())
+                .collect(CopyOnWriteArrayList::new, CopyOnWriteArrayList::add, CopyOnWriteArrayList::addAll);
     }
     
     public Optional<InstanceRecord> selectOne(final String domain) {
@@ -104,11 +118,11 @@ public class NacosDnsCore {
             
             AtomicReference<String> targetGroup = new AtomicReference<>(Constants.DEFAULT_GROUP);
             for (Map.Entry<String, Pattern> e : patternMap.entrySet()) {
-            	final Pattern p = e.getValue();
-            	Matcher matcher = p.matcher(serviceName);
-            	if (matcher.matches()) {
-            		targetGroup.set(serviceToGroup.get(e.getKey()));
-	            }
+                final Pattern p = e.getValue();
+                Matcher matcher = p.matcher(serviceName);
+                if (matcher.matches()) {
+                    targetGroup.set(serviceToGroup.get(e.getKey()));
+                }
             }
             
             try {
@@ -137,19 +151,10 @@ public class NacosDnsCore {
         });
     }
     
-    private static List<InstanceRecord> parseToInstanceRecord(List<Instance> instances) {
-        int maxSize = 10_000;
-        Stream<Instance> stream;
-        if (instances.size() < maxSize) {
-            stream = instances.stream();
-        } else {
-            stream = instances.parallelStream();
-        }
-        
-        return stream.map(instance -> InstanceRecord.builder().ip(instance.getIp()).port(instance.getPort())
-                .healthy(instance.isHealthy()).enabled(instance.isEnabled()).weight(instance.getWeight())
-                .metadata(instance.getMetadata()).build())
-                .collect(CopyOnWriteArrayList::new, CopyOnWriteArrayList::add, CopyOnWriteArrayList::addAll);
+    public void shutdown() {
+        serviceCache.clear();
+        serviceToGroup.clear();
+        patternMap.clear();
     }
     
 }
