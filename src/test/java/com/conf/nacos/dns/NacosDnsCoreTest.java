@@ -1,11 +1,3 @@
-package com.conf.nacos.dns;
-
-import com.conf.nacos.dns.pojo.InstanceRecord;
-import org.junit.Assert;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,13 +14,9 @@ import static org.junit.Assert.*;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class NacosDnsCoreTest {
 
-	@Test
-	public void testSelectService() throws Throwable {
-		NacosDnsCore nacosDnsCore = new NacosDnsCore();
-		InstanceRecord record = nacosDnsCore.selectOne("DEFAULT_GROUP@@nacos.test.1");
-		Assert.assertNotNull(record);
-	}
+package com.conf.nacos.dns;
+
+public class NacosDnsCoreTest {
 
 }

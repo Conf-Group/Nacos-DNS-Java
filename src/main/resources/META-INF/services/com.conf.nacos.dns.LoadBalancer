@@ -1,0 +1,3 @@
+com.conf.nacos.dns.loadbalancer.WeightLoadBalancer
+com.conf.nacos.dns.loadbalancer.RandomLoadBalancer
+com.conf.nacos.dns.loadbalancer.RoundRobinLoadBalancer

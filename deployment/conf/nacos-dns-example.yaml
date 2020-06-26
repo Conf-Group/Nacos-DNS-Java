@@ -1,0 +1,15 @@
+loadBalancer: RandomLoadBalancer
+
+resolver:
+  serviceGroupMatch:
+    ^nacos\t\w+\w+: liaochuntao
+
+# endpoint and serverAddr Two configurations are optional
+nacosConfig:
+  endpoint: xxx(Use this parameter if you are using address server mode)
+  serverAddr: 127.0.0.1:8847,127.0.0.1:8848,127.0.0.1:8849
+  username: xxx
+  password: xxx
+  contextPath: /nacos
+  namespaceId: ${namesapceId}
+
