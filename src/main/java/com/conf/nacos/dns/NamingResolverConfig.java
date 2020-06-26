@@ -20,20 +20,36 @@ package com.conf.nacos.dns;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.conf.nacos.dns.constants.Constants;
+
 /**
  * In which group does the service of the query fall.
  *
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class NamingResolverConfig {
-    
-    private Map<String, String> serviceGroupMatch = new HashMap<>();
-    
-    public Map<String, String> getServiceGroupMatch() {
-        return serviceGroupMatch;
-    }
-    
-    public void setServiceGroupMatch(Map<String, String> serviceGroupMatch) {
-        this.serviceGroupMatch = serviceGroupMatch;
-    }
+
+	private String defaultGroup = Constants.DEFAULT_GROUP;
+
+	private Map<String, String> serviceGroupMatch = new HashMap<>();
+
+	public NamingResolverConfig(String defaultGroup) {
+		this.defaultGroup = defaultGroup;
+	}
+
+	public String getDefaultGroup() {
+		return defaultGroup;
+	}
+
+	public void setDefaultGroup(String defaultGroup) {
+		this.defaultGroup = defaultGroup;
+	}
+
+	public Map<String, String> getServiceGroupMatch() {
+		return serviceGroupMatch;
+	}
+
+	public void setServiceGroupMatch(Map<String, String> serviceGroupMatch) {
+		this.serviceGroupMatch = serviceGroupMatch;
+	}
 }

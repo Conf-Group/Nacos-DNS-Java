@@ -17,39 +17,39 @@
 
 package com.conf.nacos.dns.loadbalancer;
 
-import com.conf.nacos.dns.LoadBalancer;
-import com.conf.nacos.dns.pojo.InstanceRecord;
-
 import java.util.List;
 import java.util.PriorityQueue;
 
+import com.conf.nacos.dns.LoadBalancer;
+import com.conf.nacos.dns.pojo.InstanceRecord;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class WeightLoadBalancer implements LoadBalancer {
-    
-    private volatile PriorityQueue<InstanceRecord> records = new PriorityQueue<>(
-            (o1, o2) -> (int) (o2.getWeight() - o1.getWeight()));
-    
-    @Override
-    public void recordChange(List<InstanceRecord> recordList) {
-        PriorityQueue<InstanceRecord> old = records;
-        
-        PriorityQueue<InstanceRecord> copy = new PriorityQueue<>((o1, o2) -> (int) (o2.getWeight() - o1.getWeight()));
-        copy.addAll(recordList);
-        
-        records = copy;
-        old.clear();
-    }
-    
-    @Override
-    public InstanceRecord selectOne() {
-        return records.peek();
-    }
-    
-    @Override
-    public String name() {
-        return "WeightLoadBalancer";
-    }
+
+	private volatile PriorityQueue<InstanceRecord> records = new PriorityQueue<>(
+			(o1, o2) -> (int) (o2.getWeight() - o1.getWeight()));
+
+	@Override
+	public void recordChange(List<InstanceRecord> recordList) {
+		PriorityQueue<InstanceRecord> old = records;
+
+		PriorityQueue<InstanceRecord> copy = new PriorityQueue<>(
+				(o1, o2) -> (int) (o2.getWeight() - o1.getWeight()));
+		copy.addAll(recordList);
+
+		records = copy;
+		old.clear();
+	}
+
+	@Override
+	public InstanceRecord selectOne() {
+		return records.peek();
+	}
+
+	@Override
+	public String name() {
+		return "WeightLoadBalancer";
+	}
 }

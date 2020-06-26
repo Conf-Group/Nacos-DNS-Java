@@ -21,5 +21,5 @@ package com.conf.nacos.dns.pojo;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class Additional extends Resource {
-    
+
 }

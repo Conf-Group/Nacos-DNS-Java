@@ -23,68 +23,68 @@ import java.util.Properties;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class NacosClientConfig {
-    
-    private String namespace;
-    
-    private String serverAddr;
-    
-    private String endpoint;
-    
-    private String contextPath;
-    
-    private String username;
-    
-    private String password;
-    
-    public String getNamespace() {
-        return namespace;
-    }
-    
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-    
-    public String getServerAddr() {
-        return serverAddr;
-    }
-    
-    public void setServerAddr(String serverAddr) {
-        this.serverAddr = serverAddr;
-    }
-    
-    public String getEndpoint() {
-        return endpoint;
-    }
-    
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-    
-    public String getContextPath() {
-        return contextPath;
-    }
-    
-    public void setContextPath(String contextPath) {
-        this.contextPath = contextPath;
-    }
-    
-    public String getUsername() {
-        return username;
-    }
-    
-    public void setUsername(String username) {
-        this.username = username;
-    }
-    
-    public String getPassword() {
-        return password;
-    }
-    
-    public void setPassword(String password) {
-        this.password = password;
-    }
-    
-    public Properties toNacosClientProperties() {
-        return new Properties();
-    }
+
+	private String namespaceId;
+
+	private String serverAddr;
+
+	private String endpoint;
+
+	private String contextPath;
+
+	private String username;
+
+	private String password;
+
+	public String getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(String namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public String getServerAddr() {
+		return serverAddr;
+	}
+
+	public void setServerAddr(String serverAddr) {
+		this.serverAddr = serverAddr;
+	}
+
+	public String getEndpoint() {
+		return endpoint;
+	}
+
+	public void setEndpoint(String endpoint) {
+		this.endpoint = endpoint;
+	}
+
+	public String getContextPath() {
+		return contextPath;
+	}
+
+	public void setContextPath(String contextPath) {
+		this.contextPath = contextPath;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public Properties toNacosClientProperties() {
+		return new Properties();
+	}
 }

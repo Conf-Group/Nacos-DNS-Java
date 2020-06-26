@@ -21,54 +21,64 @@ package com.conf.nacos.dns;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class NacosDnsConfig {
-    
-    private String loadBalancer;
-    
-    private String backendDns;
-    
-    private int bufferSize = 4096;
-    
-    private NamingResolverConfig resolver;
-    
-    private NacosClientConfig nacosConfig;
-    
-    public String getLoadBalancer() {
-        return loadBalancer;
-    }
-    
-    public void setLoadBalancer(String loadBalancer) {
-        this.loadBalancer = loadBalancer;
-    }
-    
-    public String getBackendDns() {
-        return backendDns;
-    }
-    
-    public void setBackendDns(String backendDns) {
-        this.backendDns = backendDns;
-    }
-    
-    public int getBufferSize() {
-        return bufferSize;
-    }
-    
-    public void setBufferSize(int bufferSize) {
-        this.bufferSize = bufferSize;
-    }
-    
-    public NamingResolverConfig getResolver() {
-        return resolver;
-    }
-    
-    public void setResolver(NamingResolverConfig resolver) {
-        this.resolver = resolver;
-    }
-    
-    public NacosClientConfig getNacosConfig() {
-        return nacosConfig;
-    }
-    
-    public void setNacosConfig(NacosClientConfig nacosConfig) {
-        this.nacosConfig = nacosConfig;
-    }
+
+	private String loadBalancer;
+
+	private String backendDns;
+
+	private boolean perfIPv6 = false;
+
+	private int bufferSize = 4096;
+
+	private NamingResolverConfig resolver;
+
+	private NacosClientConfig nacosConfig;
+
+	public String getLoadBalancer() {
+		return loadBalancer;
+	}
+
+	public void setLoadBalancer(String loadBalancer) {
+		this.loadBalancer = loadBalancer;
+	}
+
+	public String getBackendDns() {
+		return backendDns;
+	}
+
+	public void setBackendDns(String backendDns) {
+		this.backendDns = backendDns;
+	}
+
+	public boolean isPerfIPv6() {
+		return perfIPv6;
+	}
+
+	public void setPerfIPv6(boolean perfIPv6) {
+		this.perfIPv6 = perfIPv6;
+	}
+
+	public int getBufferSize() {
+		return bufferSize;
+	}
+
+	public void setBufferSize(int bufferSize) {
+		this.bufferSize = bufferSize;
+	}
+
+	public NamingResolverConfig getResolver() {
+		return resolver;
+	}
+
+	public void setResolver(NamingResolverConfig resolver) {
+		this.resolver = resolver;
+	}
+
+	public NacosClientConfig getNacosConfig() {
+		return nacosConfig;
+	}
+
+	public void setNacosConfig(NacosClientConfig nacosConfig) {
+		this.nacosConfig = nacosConfig;
+	}
 }

@@ -21,19 +21,19 @@ package com.conf.nacos.dns.constants;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public final class Constants {
-    
-    public static final int DNS_PORT = 53;
-    
-    public static final String DEFAULT_GROUP = com.alibaba.nacos.api.common.Constants.DEFAULT_GROUP;
-    
-    public static final String CONFIG_FILE_NAME = "nacos-dns.yaml";
-    
-    public static final String RANDOM_LOAD_BALANCER = "RandomLoadBalancer";
-    
-    public static final String ROUND_ROBIN_LOAD_BALANCER = "RoundRobinLoadBalancer";
-    
-    public static final String WEIGHT_LOAD_BALANCER = "WeightLoadBalancer";
-    
-    public static final String BYTE_BUFFER_SIZE = "byte-buffer.size";
-    
+
+	public static final int DNS_PORT = 53;
+
+	public static final String DEFAULT_GROUP = com.alibaba.nacos.api.common.Constants.DEFAULT_GROUP;
+
+	public static final String CONFIG_FILE_NAME = "nacos-dns.yaml";
+
+	public static final String RANDOM_LOAD_BALANCER = "RandomLoadBalancer";
+
+	public static final String ROUND_ROBIN_LOAD_BALANCER = "RoundRobinLoadBalancer";
+
+	public static final String WEIGHT_LOAD_BALANCER = "WeightLoadBalancer";
+
+	public static final String BYTE_BUFFER_SIZE = "byte-buffer.size";
+
 }

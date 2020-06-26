@@ -23,12 +23,12 @@ import com.conf.nacos.dns.constants.Code;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class NacosDnsException extends BaseException {
-    
-    public NacosDnsException(Code code) {
-        super(code);
-    }
-    
-    public NacosDnsException(Code code, Throwable ex) {
-        super(code, ex);
-    }
+
+	public NacosDnsException(Code code) {
+		super(code);
+	}
+
+	public NacosDnsException(Code code, Throwable ex) {
+		super(code, ex);
+	}
 }

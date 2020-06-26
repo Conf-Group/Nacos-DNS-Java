@@ -34,79 +34,73 @@ import java.nio.ByteBuffer;
  *   +--+--+--+--+--+--+--+
  *   |      Additional    |
  *   +--+--+--+--+--+--+--+
+ * </pre>
  *
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  */
 public class Message {
-    
-    //
-    private Header header;
-    private Question question;
-    
-    // It only appears on return
-    private Answer answer;
-    private Authority authority;
-    private Additional additional;
-    
-    public Message(final byte[] data) {
-        ByteBuffer buffer = ByteBuffer.wrap(data);
-        header = new Header(buffer);
-        question = new Question(buffer);
-    }
-    
-    public Header getHeader() {
-        return header;
-    }
-    
-    public void setHeader(Header header) {
-        this.header = header;
-    }
-    
-    public Question getQuestion() {
-        return question;
-    }
-    
-    public void setQuestion(Question question) {
-        this.question = question;
-    }
-    
-    public Answer getAnswer() {
-        return answer;
-    }
-    
-    public void setAnswer(Answer answer) {
-        this.answer = answer;
-    }
-    
-    public Authority getAuthority() {
-        return authority;
-    }
-    
-    public void setAuthority(Authority authority) {
-        this.authority = authority;
-    }
-    
-    public Additional getAdditional() {
-        return additional;
-    }
-    
-    public void setAdditional(Additional additional) {
-        this.additional = additional;
-    }
-    
-    @Override
-    public String toString() {
-        return new StringBuilder()
-                .append("header=").append(header)
-                .append('\n')
-                .append("question=").append(question)
-                .append('\n')
-                .append("answer=").append(answer)
-                .append('\n')
-                .append("authority=").append(authority)
-                .append('\n')
-                .append("additional=").append(additional)
-                .append('\n')
-                .toString();
-    }
+
+	//
+	private Header header;
+	private Question question;
+
+	// It only appears on return
+	private Answer answer;
+	private Authority authority;
+	private Additional additional;
+
+	public Message(final byte[] data) {
+		ByteBuffer buffer = ByteBuffer.wrap(data);
+		header = new Header(buffer);
+		question = new Question(buffer);
+	}
+
+	public Header getHeader() {
+		return header;
+	}
+
+	public void setHeader(Header header) {
+		this.header = header;
+	}
+
+	public Question getQuestion() {
+		return question;
+	}
+
+	public void setQuestion(Question question) {
+		this.question = question;
+	}
+
+	public Answer getAnswer() {
+		return answer;
+	}
+
+	public void setAnswer(Answer answer) {
+		this.answer = answer;
+	}
+
+	public Authority getAuthority() {
+		return authority;
+	}
+
+	public void setAuthority(Authority authority) {
+		this.authority = authority;
+	}
+
+	public Additional getAdditional() {
+		return additional;
+	}
+
+	public void setAdditional(Additional additional) {
+		this.additional = additional;
+	}
+
+	@Override
+	public String toString() {
+		return new StringBuilder().append("header=").append(header).append('\n')
+				.append("question=").append(question).append('\n').append("answer=")
+				.append(answer).append('\n').append("authority=").append(authority)
+				.append('\n').append("additional=").append(additional).append('\n')
+				.toString();
+	}
 }
